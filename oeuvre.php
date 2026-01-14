@@ -1,40 +1,45 @@
 <?php
     require 'header.php';
-    require 'oeuvres.php';
+    require 'bdd.php';
 
     // Si l'URL ne contient pas d'id, on redirige sur la page d'accueil
     if(empty($_GET['id'])) {
         header('Location: index.php');
     }
 
-    $oeuvre = null;
+    // Sécurisation de l'id
+    $id = intval($_GET['id']); 
 
-    // On parcourt les oeuvres du tableau afin de rechercher celle qui a l'id précisé dans l'URL
-    foreach($oeuvres as $o) {
-        // intval permet de transformer l'id de l'URL en un nombre (exemple : "2" devient 2)
-        if($o['id'] === intval($_GET['id'])) {
-            $oeuvre = $o;
-            break; // On stoppe le foreach si on a trouvé l'oeuvre
-        }
-    }
 
-    // Si aucune oeuvre trouvé, on redirige vers la page d'accueil
-    if(is_null($oeuvre)) {
-        header('Location: index.php');
-    }
+    // Connexion à la base
+    $pdo = connexion();
+
+    // Requête préparée pour récupérer l'oeuvre correspondant à l'id
+    $stmt = $pdo->prepare("SELECT * FROM oeuvre WHERE id = :id");
+    $stmt->execute(['id' => $id]);
+    $oeuvre = $stmt->fetch(); // fetch renvoie false si aucune oeuvre
+
+   // Gestion d'un id inexistant
+    if (!$oeuvre) {
+
+        // redirection vers l'accueil
+         header('Location: index.php');
+         exit;
+         }
 ?>
-
+ 
 <article id="detail-oeuvre">
     <div id="img-oeuvre">
-        <img src="<?= $oeuvre['image'] ?>" alt="<?= $oeuvre['titre'] ?>">
+        <img src="<?= htmlspecialchars($oeuvre['image']) ?>" alt="<?= htmlspecialchars($oeuvre['titre']) ?>">
     </div>
     <div id="contenu-oeuvre">
-        <h1><?= $oeuvre['titre'] ?></h1>
-        <p class="description"><?= $oeuvre['artiste'] ?></p>
+        <h1><?= htmlspecialchars($oeuvre['titre']) ?></h1>
+        <p class="description"><?= htmlspecialchars($oeuvre['artiste']) ?></p>
         <p class="description-complete">
-             <?= $oeuvre['description'] ?>
+            <?= htmlspecialchars($oeuvre['description']) ?>
         </p>
     </div>
 </article>
+
 
 <?php require 'footer.php'; ?>
