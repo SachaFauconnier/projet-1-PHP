@@ -14,7 +14,7 @@
     // Connexion à la base
     $pdo = connexion();
 
-    // Requête préparée pour récupérer l'oeuvre correspondant à l'id
+    // Requête préparée pour eviter les injections sql
     $stmt = $pdo->prepare("SELECT * FROM oeuvre WHERE id = :id");
     $stmt->execute(['id' => $id]);
     $oeuvre = $stmt->fetch(); // fetch renvoie false si aucune oeuvre
